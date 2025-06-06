@@ -20,6 +20,7 @@ logging.basicConfig(
 )
 
 
+
 logger = logging.getLogger(__name__)
 
 # =================CORS Configurations=================
