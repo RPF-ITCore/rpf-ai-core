@@ -24,10 +24,10 @@ class QdrantDBProvider(VectorDBInterface):
         self.config = get_settings()
         
     
-    def connect(self):
+    def connect(self, url : str, api_key : str):
         self.client = QdrantClient(
-                        url="https://48593b37-68ed-4f52-9390-71f239e282eb.us-west-2-0.aws.cloud.qdrant.io:6333", 
-                        api_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.AwYj5R1igcLG0OOVxG4ClyCIdf4SGJhyZ_dm6a_NlaM",
+                        url=url, 
+                        api_key=api_key,
                             )
         self.logger.info("Qdrant Provider : Connected")
     

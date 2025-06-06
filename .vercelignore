@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+assets/
+.vscode/
+*.ipynb
+*.md
+*.log
+*.sqlite3
+.qdrant/
+tests/
+docs/

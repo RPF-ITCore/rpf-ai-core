@@ -6,7 +6,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from vectordb import VectorDBProviderFactory
 from llm import LLMProviderFactory
 from llm.prompt_templates import TemplateParser
-from routes import base_router, data_router
+from routes import base_router, data_router, chat_router
 app = FastAPI()
 
 # =================Logger Configurations=================
@@ -18,6 +18,7 @@ logging.basicConfig(
         logging.StreamHandler(),  # Logs to the console
     ]
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -44,16 +45,16 @@ async def startup():
     
     
         # =================VectorDB Initialization=================
-    # try:
-    #     vector_db_provider_factory = VectorDBProviderFactory(settings)
+    try:
+        vector_db_provider_factory = VectorDBProviderFactory(settings)
 
-    #     app.vectordb_client = vector_db_provider_factory.create(provider = settings.VECTORDB_BACKEND)
-    #     app.vectordb_client.connect()
+        app.vectordb_client = vector_db_provider_factory.create(provider = settings.VECTORDB_BACKEND)
+        app.vectordb_client.connect(url=settings.VECTORDB_URL, api_key=settings.QDRANT_API_KEY)
 
-    #     logger.info("VectorDB provider has been initialized successfully")
+        logger.info("VectorDB provider has been initialized successfully")
     
-    # except Exception as e:
-    #     logger.error(f"Error initializing VectorDB: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error initializing VectorDB: {str(e)}")
         
         
         # =================LLM Initialization=================
@@ -91,13 +92,15 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
-    app.mongo_conn.close()
-    app.vectordb_client.disconnect()     
+    # app.mongo_conn.close()  # Commented out since MongoDB is not initialized
+    if hasattr(app, 'vectordb_client'):
+        app.vectordb_client.disconnect()     
     
     
     
 # =================Routers Configurations=================  
 app.include_router(base_router)
 app.include_router(data_router)
+app.include_router(chat_router)
 
 

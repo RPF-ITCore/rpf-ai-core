@@ -2,6 +2,7 @@ from ..LLMInterface import LLMInterface
 from ..LLMEnums import OpenAIEnums
 from openai import OpenAI
 import logging
+from typing import List, Dict
 
 class OpenAIProvider(LLMInterface):
 
@@ -94,6 +95,50 @@ class OpenAIProvider(LLMInterface):
             self.logger.error(f"Error generating text with OpenAI: {str(e)}")
             raise e
 
+    async def chat(self, messages: List[Dict[str, str]], max_tokens: int = None, temperature: float = None) -> str:
+        """
+        Chat method expected by flows. Takes list of message dicts with 'role' and 'content' keys.
+        This is the primary method used by flows.
+        """
+        if not self.client:
+            self.logger.error("OpenAI client was not set")
+            raise Exception("OpenAI client was not set")
+
+        if not self.generation_model_id:
+            self.logger.error("Generation model for OpenAI was not set")
+            raise Exception("Generation model for OpenAI was not set")
+        
+        max_tokens = max_tokens if max_tokens else self.default_generation_max_output_tokens
+        temperature = temperature if temperature else self.default_generation_temperature
+
+        try:
+            # Process the messages to ensure content is within character limits
+            processed_messages = []
+            for msg in messages:
+                processed_messages.append({
+                    "role": msg["role"],
+                    "content": self.process_text(msg["content"])
+                })
+
+            response = self.client.chat.completions.create(
+                model=self.generation_model_id,
+                messages=processed_messages,
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+            
+            self.logger.info(f"Chat response generated successfully")
+            
+            if not response or not response.choices or len(response.choices) == 0:
+                self.logger.error("Empty response from OpenAI")
+                raise Exception("Empty response from OpenAI")
+            
+            return response.choices[0].message.content
+            
+        except Exception as e:
+            self.logger.error(f"Error in chat with OpenAI: {str(e)}")
+            raise e
+
     def embed_text(self, text: str, document_type: str = None):
         
         if not self.client:
@@ -114,6 +159,38 @@ class OpenAIProvider(LLMInterface):
             return None
 
         return response.data[0].embedding
+    
+    def batch_embed(self, texts: List[str], document_type: str | None = None) -> List[List[float]]:
+        """
+        Embed a batch of texts and return a list of embedding vectors.
+
+        Args:
+            texts: List of input strings to embed.
+            document_type: Optional tag for downstream bookkeeping.
+
+        Returns:
+            List[List[float]] – one embedding vector per input text.
+        """
+        if not self.client:
+            self.logger.error("OpenAI client was not set")
+            return None
+
+        if not self.embedding_model_id:
+            self.logger.error("Embedding model for OpenAI was not set")
+            return None
+
+        response = self.client.embeddings.create(
+            model=self.embedding_model_id,
+            input=texts,
+        )
+
+        if (not response) or (not response.data):
+            self.logger.error("Error while embedding texts with OpenAI")
+            return None
+
+        # response.data is an array of objects with an `.embedding` attribute
+        return [item.embedding for item in response.data]
+
 
     #TODO: call the process_text
     def construct_prompt(self, prompt: str, role: str):
