@@ -25,18 +25,39 @@ class QdrantDBProvider(VectorDBInterface):
         
     
     def connect(self, url : str, api_key : str):
-        self.client = QdrantClient(
-                        url=url, 
-                        api_key=api_key,
-                            )
-        self.logger.info("Qdrant Provider : Connected")
+        try:
+            self.client = QdrantClient(
+                            url=url, 
+                            api_key=api_key,
+                                )
+            # Test the connection by trying to get collections
+            collections = self.client.get_collections()
+            self.logger.info(f"Qdrant Provider : Connected successfully. Found {len(collections.collections)} collections.")
+        except Exception as e:
+            self.logger.error(f"Qdrant Provider : Connection failed: {str(e)}")
+            self.logger.error(f"URL: {url}")
+            self.logger.error(f"API Key provided: {'Yes' if api_key else 'No'}")
+            raise e
     
     def disconnect(self):
         self.client = None
         self.logger.info("Qdrant Provider : Disconnected")
     
     def is_collection_exist(self, collection_name : str) -> bool:
-        return self.client.collection_exists(collection_name = collection_name)
+        try:
+            return self.client.collection_exists(collection_name = collection_name)
+        except Exception as e:
+            self.logger.error(f"Error checking if collection exists: {str(e)}")
+            # Try an alternative approach - list all collections and check
+            try:
+                collections = self.client.get_collections()
+                collection_names = [col.name for col in collections.collections]
+                exists = collection_name in collection_names
+                self.logger.info(f"Alternative check - Collection '{collection_name}' exists: {exists}")
+                return exists
+            except Exception as e2:
+                self.logger.error(f"Alternative collection check also failed: {str(e2)}")
+                return False
     
     def list_all_collections(self) -> List:
         return self.client.get_collections()
@@ -53,9 +74,13 @@ class QdrantDBProvider(VectorDBInterface):
     def create_collection(self, collection_name : str, embedding_size : int, do_reset : bool = False):
         try:
             if do_reset:
+                self.logger.info(f"Resetting collection '{collection_name}'")
                 _ = self.delete_collection(collection_name=collection_name)
             
-            if not self.is_collection_exist(collection_name=collection_name):
+            collection_exists = self.is_collection_exist(collection_name=collection_name)
+            self.logger.info(f"Collection '{collection_name}' exists: {collection_exists}")
+            
+            if not collection_exists:
                 self.logger.info(f"Creating collection '{collection_name}' with embedding size: {embedding_size}")
                 self.client.create_collection(
                     collection_name=collection_name,
@@ -64,21 +89,27 @@ class QdrantDBProvider(VectorDBInterface):
                         distance=self.distance_method,
                     )
                 )
+                self.logger.info(f"Successfully created collection '{collection_name}'")
                 return True
             else:
                 # If collection exists, verify its configuration
                 self.logger.info(f"Collection '{collection_name}' exists, checking its configuration")
-                collection_info = self.get_collection_info(collection_name)
-                self.logger.info(f"Collection info: {collection_info}")
-                
-                # Access vector config using object attributes instead of dictionary access
-                if collection_info and hasattr(collection_info, 'config') and hasattr(collection_info.config, 'params'):
-                    vector_size = collection_info.config.params.size
-                    if vector_size != embedding_size:
-                        self.logger.warning(f"Collection '{collection_name}' exists with different embedding size ({vector_size} vs {embedding_size}). Deleting and recreating.")
-                        _ = self.delete_collection(collection_name=collection_name)
-                        return self.create_collection(collection_name, embedding_size, do_reset=False)
-                return False
+                try:
+                    collection_info = self.get_collection_info(collection_name)
+                    self.logger.info(f"Collection info retrieved successfully")
+                    
+                    # Access vector config using object attributes instead of dictionary access
+                    if collection_info and hasattr(collection_info, 'config') and hasattr(collection_info.config, 'params'):
+                        vector_size = collection_info.config.params.size
+                        if vector_size != embedding_size:
+                            self.logger.warning(f"Collection '{collection_name}' exists with different embedding size ({vector_size} vs {embedding_size}). Deleting and recreating.")
+                            _ = self.delete_collection(collection_name=collection_name)
+                            return self.create_collection(collection_name, embedding_size, do_reset=False)
+                    return False
+                except Exception as info_error:
+                    self.logger.error(f"Error getting collection info: {str(info_error)}")
+                    # Collection exists but we can't get info, assume it's okay to use
+                    return False
         except Exception as e:
             self.logger.error(f"Error creating collection: {str(e)}")
             raise e

@@ -14,6 +14,40 @@ def get_kb_service(request: Request) -> KnowledgeBaseService:
         raise HTTPException(status_code=500, detail="Vector database not initialized")
     return KnowledgeBaseService(request.app.vectordb_client)
 
+@chat_router.get("/test-connection", summary="Test Qdrant Connection")
+async def test_qdrant_connection(request: Request):
+    """
+    Test Qdrant database connection
+    """
+    try:
+        if not hasattr(request.app, 'vectordb_client'):
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"status": "error", "message": "Vector database not initialized"}
+            )
+        
+        vectordb_client = request.app.vectordb_client
+        
+        # Try to list collections
+        collections = vectordb_client.list_all_collections()
+        
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "status": "success", 
+                "message": "Qdrant connection is working",
+                "collections_count": len(collections.collections),
+                "collections": [col.name for col in collections.collections]
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Qdrant connection test failed: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"status": "error", "message": f"Qdrant connection failed: {str(e)}"}
+        )
+
 @chat_router.post("/ingest-syria-kb", summary="Ingest Syria Knowledge Base", status_code=status.HTTP_200_OK)
 async def ingest_syria_knowledge_base(
     request: KnowledgeBaseIngestSchema,
