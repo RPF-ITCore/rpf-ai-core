@@ -15,3 +15,4 @@ pydantic[email]
 python-jose
 cohere==5.14.0
 mangum
+gunicorn==21.2.0
