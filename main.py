@@ -6,7 +6,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from vectordb import VectorDBProviderFactory
 from llm import LLMProviderFactory
 from llm.prompt_templates import TemplateParser
-from routes import base_router, data_router, chat_router
+from routes import base_router, data_router, chat_router, chat_session_router
 app = FastAPI()
 
 # =================Logger Configurations=================
@@ -36,13 +36,13 @@ app.add_middleware(
 async def startup():
     settings = get_settings()
 
-    # # ======================MongoDB Intialization ======================
-    # try:
-    #     app.mongo_conn = AsyncIOMotorClient(settings.MONGODB_URL)
-    #     app.db_client = app.mongo_conn[settings.MONGODB_DATABASE]
-    #     logger.info(f"Connected to MongoDB Atlas")
-    # except Exception as e:
-    #     logger.error(f"Error connecting to MongoDB: {str(e)}")
+    # ======================MongoDB Intialization ======================
+    try:
+        app.mongo_conn = AsyncIOMotorClient(settings.MONGODB_URL)
+        app.db_client = app.mongo_conn[settings.MONGODB_DATABASE]
+        logger.info(f"Connected to MongoDB Atlas")
+    except Exception as e:
+        logger.error(f"Error connecting to MongoDB: {str(e)}")
     
     
         # =================VectorDB Initialization=================
@@ -93,7 +93,8 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
-    # app.mongo_conn.close()  # Commented out since MongoDB is not initialized
+    if hasattr(app, 'mongo_conn'):
+        app.mongo_conn.close()
     if hasattr(app, 'vectordb_client'):
         app.vectordb_client.disconnect()     
     
@@ -103,5 +104,6 @@ async def shutdown():
 app.include_router(base_router)
 app.include_router(data_router)
 app.include_router(chat_router)
+app.include_router(chat_session_router)
 
 

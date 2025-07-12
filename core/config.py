@@ -8,11 +8,6 @@ class Settings(BaseSettings):
 
     MONGODB_URL : str
     MONGODB_DATABASE : str
-
-    
-    # FILE_ALLOWED_TYPES : list[str]
-    # FILE_MAX_SIZE : int
-    # FILE_DEFAULT_CHUNK_SIZE : int
     
     GENERATION_BACKEND : str
     EMBEDDING_BACKEND : str

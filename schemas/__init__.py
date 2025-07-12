@@ -1,4 +1,4 @@
 from .utils import RetrievedDocumentSchema
-from .chat_schemas import ChatRequestSchema, ChatResponseSchema, KnowledgeBaseIngestSchema
+from .chat import ChatRequestSchema, ChatResponseSchema, KnowledgeBaseIngestSchema, ChatMessage, ChatSession, ChatSessionWithMessages, SessionSummary
 
-__all__ = ["RetrievedDocumentSchema", "ChatRequestSchema", "ChatResponseSchema", "KnowledgeBaseIngestSchema"]
+__all__ = ["RetrievedDocumentSchema", "ChatRequestSchema", "ChatResponseSchema", "KnowledgeBaseIngestSchema", "ChatMessage", "ChatSession", "ChatSessionWithMessages", "SessionSummary"]
