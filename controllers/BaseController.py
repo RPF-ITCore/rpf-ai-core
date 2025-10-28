@@ -3,6 +3,9 @@ import os
 import json
 from bson.objectid import ObjectId
 from datetime import datetime
+from fastapi.responses import JSONResponse
+from typing import Any, List
+from schemas.utils import ErrorItem
 
 
 class BaseController:
@@ -45,4 +48,35 @@ class BaseController:
                 return str(obj)
         
         return json.loads(json.dumps(info, default=custom_serializer))
+
+    # ---------- Standardized envelope helpers ----------
+    def ok(self, data: Any = None, message: str = "OK", status_code: int = 200):
+        payload = {
+            "message": message,
+            "data": data,
+            "errors": []
+        }
+        return JSONResponse(
+            status_code=status_code,
+            content=self.get_json_serializable_object(payload)
+        )
+
+    def fail(self, message: str, errors: List[ErrorItem | str] = [], status_code: int = 400):
+        normalized_errors = []
+        for e in errors:
+            if isinstance(e, ErrorItem):
+                normalized_errors.append(e.model_dump())
+            elif isinstance(e, dict):
+                normalized_errors.append(e)
+            else:
+                normalized_errors.append({"message": str(e)})
+        payload = {
+            "message": message,
+            "data": None,
+            "errors": normalized_errors
+        }
+        return JSONResponse(
+            status_code=status_code,
+            content=self.get_json_serializable_object(payload)
+        )
 

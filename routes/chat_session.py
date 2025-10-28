@@ -7,11 +7,14 @@ from controllers.ChatController import ChatController
 from dtos.chat import (
     CreateSessionRequest, ChatRequest, SessionResponse, 
     ChatResponse, SessionWithMessagesResponse, SessionListResponse,
-    MessageListResponse
+    MessageListResponse, UpdateSessionRequest
 )
 from schemas.chat import SessionStatus
+from dependencies.auth import require_user
+from controllers.BaseController import BaseController
 
 chat_session_router = APIRouter(prefix="/chat-session", tags=["Chat Sessions"])
+base = BaseController()
 logger = logging.getLogger(__name__)
 
 def get_chat_controller(request: Request) -> ChatController:
@@ -34,14 +37,17 @@ async def initialize_chat_controller():
 @chat_session_router.post("/sessions", summary="Create New Chat Session", response_model=SessionResponse)
 async def create_session(
     request: CreateSessionRequest,
+    current_user = Depends(require_user),
     controller: ChatController = Depends(get_chat_controller)
 ):
     """
     Create a new chat session
     """
     try:
+        # enforce authenticated user
+        request.user_id = getattr(current_user, 'id', None)
         session = await controller.create_session(request)
-        return session
+        return base.ok(data=session.model_dump(), message="Session created", status_code=status.HTTP_201_CREATED)
         
     except Exception as e:
         logger.error(f"Error creating session: {str(e)}")
@@ -53,6 +59,7 @@ async def create_session(
 @chat_session_router.get("/sessions/{session_id}", summary="Get Chat Session", response_model=SessionResponse)
 async def get_session(
     session_id: str,
+    current_user = Depends(require_user),
     controller: ChatController = Depends(get_chat_controller)
 ):
     """
@@ -65,7 +72,7 @@ async def get_session(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Session not found: {session_id}"
             )
-        return session
+        return base.ok(data=session.model_dump(), message="Session fetched")
         
     except HTTPException:
         raise
@@ -76,10 +83,38 @@ async def get_session(
             detail=f"Error getting session: {str(e)}"
         )
 
+@chat_session_router.patch("/sessions/{session_id}", summary="Rename/Update Chat Session")
+async def update_session(
+    session_id: str,
+    request: UpdateSessionRequest,
+    current_user = Depends(require_user),
+    controller: ChatController = Depends(get_chat_controller)
+):
+    """
+    Update a chat session (e.g., rename title)
+    """
+    try:
+        updated = await controller.update_session(session_id, request)
+        if not updated:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Session not found: {session_id}"
+            )
+        return base.ok(data=updated.model_dump(), message="Session updated")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating session {session_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating session: {str(e)}"
+        )
+
 @chat_session_router.get("/sessions/{session_id}/messages", summary="Get Session with Messages", response_model=SessionWithMessagesResponse)
 async def get_session_with_messages(
     session_id: str,
     limit: Optional[int] = Query(None, description="Limit number of messages to return"),
+    current_user = Depends(require_user),
     controller: ChatController = Depends(get_chat_controller)
 ):
     """
@@ -92,7 +127,7 @@ async def get_session_with_messages(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Session not found: {session_id}"
             )
-        return session_with_messages
+        return base.ok(data=session_with_messages.model_dump(), message="Session with messages fetched")
         
     except HTTPException:
         raise
@@ -105,26 +140,28 @@ async def get_session_with_messages(
 
 @chat_session_router.get("/sessions", summary="List Chat Sessions", response_model=SessionListResponse)
 async def list_sessions(
-    user_id: Optional[str] = Query(None, description="Filter by user ID"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Page size"),
+    current_user = Depends(require_user),
     controller: ChatController = Depends(get_chat_controller)
 ):
     """
     List chat sessions with pagination
     """
     try:
-        sessions, total = await controller.list_sessions(user_id=user_id, page=page, page_size=page_size)
+        # List only sessions for the authenticated user
+        effective_user_id = getattr(current_user, 'id', None)
+        sessions, total = await controller.list_sessions(user_id=effective_user_id, page=page, page_size=page_size)
         
         has_next = (page * page_size) < total
         
-        return SessionListResponse(
-            sessions=sessions,
-            total=total,
-            page=page,
-            page_size=page_size,
-            has_next=has_next
-        )
+        return base.ok(data={
+            "sessions": [s.model_dump() for s in sessions],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "has_next": has_next
+        }, message="Sessions listed")
         
     except Exception as e:
         logger.error(f"Error listing sessions: {str(e)}")
@@ -136,6 +173,7 @@ async def list_sessions(
 @chat_session_router.delete("/sessions/{session_id}", summary="Delete Chat Session")
 async def delete_session(
     session_id: str,
+    current_user = Depends(require_user),
     controller: ChatController = Depends(get_chat_controller)
 ):
     """
@@ -149,10 +187,7 @@ async def delete_session(
                 detail=f"Session not found: {session_id}"
             )
         
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={"message": f"Session {session_id} deleted successfully"}
-        )
+        return base.ok(message=f"Session {session_id} deleted successfully")
         
     except HTTPException:
         raise
@@ -172,6 +207,7 @@ async def get_session_messages(
     session_id: str,
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(50, ge=1, le=100, description="Page size"),
+    current_user = Depends(require_user),
     controller: ChatController = Depends(get_chat_controller)
 ):
     """
@@ -192,13 +228,13 @@ async def get_session_messages(
         # In a real application, you might want to count total messages
         has_next = len(messages) == page_size
         
-        return MessageListResponse(
-            messages=messages,
-            total=len(messages),  # This is just the current page count
-            page=page,
-            page_size=page_size,
-            has_next=has_next
-        )
+        return base.ok(data={
+            "messages": [m.model_dump() for m in messages],
+            "total": len(messages),
+            "page": page,
+            "page_size": page_size,
+            "has_next": has_next
+        }, message="Messages listed")
         
     except HTTPException:
         raise
@@ -216,6 +252,7 @@ async def get_session_messages(
 @chat_session_router.post("/chat", summary="Send Message and Get AI Response", response_model=ChatResponse)
 async def chat(
     request: ChatRequest,
+    current_user = Depends(require_user),
     controller: ChatController = Depends(get_chat_controller)
 ):
     """
@@ -226,6 +263,8 @@ async def chat(
         # Initialize controller (create indexes if needed)
         await controller.initialize()
         
+        # enforce authenticated user context
+        request.user_id = getattr(current_user, 'id', None)
         response = await controller.chat(request)
         
         if not response.success:
@@ -234,7 +273,7 @@ async def chat(
                 detail=response.error or "Chat processing failed"
             )
         
-        return response
+        return base.ok(data=response.model_dump(), message="Chat completed")
         
     except HTTPException:
         raise
@@ -260,22 +299,8 @@ async def health_check(
         # Try to initialize controller to check database connectivity
         await controller.initialize()
         
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
-                "status": "healthy",
-                "message": "Chat session service is running",
-                "database": "connected"
-            }
-        )
+        return base.ok(data={"status": "healthy", "database": "connected"}, message="Chat session service is running")
         
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "status": "unhealthy", 
-                "message": f"Service error: {str(e)}",
-                "database": "disconnected"
-            }
-        ) 
+        return base.fail(message=f"Service error: {str(e)}", errors=["database: disconnected"], status_code=status.HTTP_503_SERVICE_UNAVAILABLE) 

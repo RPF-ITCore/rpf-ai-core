@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 import uuid
 from typing import Optional, List
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -8,7 +9,8 @@ from llm.llm_config import get_generation_client
 from schemas.chat import MessageRole, MessageType
 from dtos.chat import (
     CreateSessionRequest, CreateMessageRequest, ChatRequest,
-    SessionResponse, MessageResponse, ChatResponse, SessionWithMessagesResponse
+    SessionResponse, MessageResponse, ChatResponse, SessionWithMessagesResponse,
+    UpdateSessionRequest
 )
 
 logger = logging.getLogger(__name__)
@@ -80,6 +82,17 @@ class ChatController:
         except Exception as e:
             logger.error(f"Error deleting session {session_id}: {str(e)}")
             raise
+
+    async def update_session(self, session_id: str, request: UpdateSessionRequest) -> Optional[SessionResponse]:
+        """Update a chat session (e.g., rename title, change status, metadata)"""
+        try:
+            updated = await self.chat_service.update_session(session_id, request)
+            if not updated:
+                logger.warning(f"Session not found or not updated: {session_id}")
+            return updated
+        except Exception as e:
+            logger.error(f"Error updating session {session_id}: {str(e)}")
+            raise
     
     async def chat(self, request: ChatRequest) -> ChatResponse:
         """
@@ -93,7 +106,7 @@ class ChatController:
             if not session_id or request.create_new_session:
                 create_session_req = CreateSessionRequest(
                     user_id=request.user_id,
-                    title=f"Chat Session - {request.message[:30]}..."
+                    title=f"New Chat - {datetime.utcnow().strftime('%Y-%m-%d')}"
                 )
                 session = await self.create_session(create_session_req)
                 session_id = session.id
@@ -147,8 +160,8 @@ class ChatController:
         Generate AI response based on chat history
         """
         try:
-            # Get recent messages for context (last 10 messages)
-            recent_messages = await self.chat_service.get_recent_messages(session_id, count=10)
+            # Get recent messages for context (last 5 messages)
+            recent_messages = await self.chat_service.get_recent_messages(session_id, count=5)
             
             # Convert to LLM format
             llm_messages = []
@@ -156,7 +169,10 @@ class ChatController:
             # Add system message
             llm_messages.append({
                 "role": "system",
-                "content": "You are a helpful AI assistant. Provide accurate, helpful, and engaging responses to user questions."
+                "content": (
+                    "You are a professional AI assistant. Be clear, accurate, and helpful. "
+                    "Prefer concise answers; include specifics when useful. If unsure, say so rather than guessing."
+                )
             })
             
             # Add conversation history

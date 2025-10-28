@@ -4,7 +4,7 @@ python-multipart==0.0.9
 python-dotenv==1.0.1
 pydantic-settings==2.2.1
 aiofiles==23.2.1
-langchain==0.1.20
+langchain
 PyMuPDF==1.24.3
 Motor==3.1.1
 pymongo==4.3.3
@@ -12,7 +12,10 @@ pydantic-mongo==2.3.0
 qdrant-client==1.10.1
 openai==1.58.1
 pydantic[email]
-python-jose
+python-jose[cryptography]
+bcrypt==4.0.1
+passlib==1.7.4
 cohere==5.14.0
 mangum
-gunicorn==21.2.0
+gunicorn
+packaging

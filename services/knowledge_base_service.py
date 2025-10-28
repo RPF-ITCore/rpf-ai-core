@@ -1,11 +1,14 @@
 import os
 import logging
-from typing import List
+from typing import List, Optional
 from fastapi import HTTPException
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from llm.llm_config import get_generation_client, get_embedding_client
 from core.config import get_settings
+from schemas.knowledge_base_schemas import KnowledgeBase, Document, DataChunk
+from dtos.knowledge_base import UploadDocumentRequest, UploadDocumentResponse, DataChunkDTO
+from bson import ObjectId
 
 class KnowledgeBaseService:
     def __init__(self, vectordb_client):
@@ -178,3 +181,60 @@ Answer:"""
         except Exception as e:
             self.logger.error(f"Error getting collection info: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error getting collection info: {str(e)}") 
+
+class KnowledgeBaseMongoService:
+    def __init__(self, db, vectordb_client, embedding_client):
+        self.db = db
+        self.vectordb_client = vectordb_client
+        self.embedding_client = embedding_client
+        self.knowledge_bases = db.knowledge_bases
+        self.documents = db.documents
+        self.data_chunks = db.data_chunks
+        self.logger = logging.getLogger(__name__)
+
+    async def get_knowledge_base(self, kb_id: str) -> Optional[KnowledgeBase]:
+        doc = await self.knowledge_bases.find_one({"_id": ObjectId(kb_id)})
+        return KnowledgeBase(**doc) if doc else None
+
+    async def create_document(self, doc: Document) -> str:
+        result = await self.documents.insert_one(doc.model_dump(by_alias=True, exclude={"id"}))
+        return str(result.inserted_id)
+
+    async def create_data_chunks(self, chunks: List[DataChunk]) -> int:
+        if not chunks:
+            return 0
+        await self.data_chunks.insert_many([chunk.model_dump(by_alias=True, exclude={"id"}) for chunk in chunks])
+        return len(chunks)
+
+    async def ingest_document(self, kb_id: str, file_path: str, name: str, type_: str, description: Optional[str], chunk_size: int = 1200, overlap_size: int = 200) -> UploadDocumentResponse:
+        # 1. Check KB exists
+        kb = await self.get_knowledge_base(kb_id)
+        if not kb:
+            raise HTTPException(status_code=404, detail="Knowledge base not found")
+        # 2. Create Document
+        doc = Document(knowledge_base_id=kb_id, name=name, type=type_, description=description)
+        doc_id = await self.create_document(doc)
+        # 3. Extract and chunk
+        from controllers.ProcessDataController import ProcessDataController
+        process_ctrl = ProcessDataController(project_id=kb_id)  # project_id can be kb_id for now
+        file_content = process_ctrl.get_file_content(file_id=file_path)
+        if not file_content:
+            raise HTTPException(status_code=400, detail="Failed to extract file content")
+        chunks = process_ctrl.process_file_content(file_content, chunk_size=chunk_size, overlap_size=overlap_size)
+        # 4. Store chunks in MongoDB
+        data_chunks = []
+        for idx, chunk in enumerate(chunks):
+            data_chunks.append(DataChunk(document_id=doc_id, text_chunk=chunk.page_content, order=idx, metadata=chunk.metadata))
+        await self.create_data_chunks(data_chunks)
+        # 5. Embed and store in vector DB
+        texts = [chunk.text_chunk for chunk in data_chunks]
+        metadatas = [chunk.metadata for chunk in data_chunks]
+        embeddings = [self.embedding_client.get_embedding(text) for text in texts]
+        record_ids = list(range(len(texts)))
+        collection_name = f"kb_{kb_id}"
+        embedding_size = int(self.embedding_client.model_config.get('embedding_size', 1536))
+        self.vectordb_client.create_collection(collection_name=collection_name, embedding_size=embedding_size, do_reset=False)
+        success = self.vectordb_client.insert_many(collection_name=collection_name, texts=texts, vectors=embeddings, metadatas=metadatas, record_ids=record_ids)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to insert into vector DB")
+        return UploadDocumentResponse(document_id=doc_id, knowledge_base_id=kb_id, chunk_count=len(data_chunks), vector_db_collection=collection_name, message="Document ingested successfully") 

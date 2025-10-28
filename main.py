@@ -1,4 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.responses import Response
+from starlette import status as http_status
+from fastapi import HTTPException
 from core.config import get_settings
 import logging
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,7 +11,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from vectordb import VectorDBProviderFactory
 from llm import LLMProviderFactory
 from llm.prompt_templates import TemplateParser
-from routes import base_router, data_router, chat_router, chat_session_router
+from routes import base_router, data_router, chat_router, chat_session_router, auth_router
 app = FastAPI()
 
 # =================Logger Configurations=================
@@ -102,8 +107,51 @@ async def shutdown():
     
 # =================Routers Configurations=================  
 app.include_router(base_router)
+app.include_router(auth_router)
 app.include_router(data_router)
 app.include_router(chat_router)
 app.include_router(chat_session_router)
 
 
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "message": exc.detail if isinstance(exc.detail, str) else "HTTP error",
+            "data": None,
+            "errors": [exc.detail] if isinstance(exc.detail, str) else [str(exc.detail)],
+        },
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = []
+    for err in exc.errors():
+        errors.append({
+            "message": err.get("msg", "Validation error"),
+            "code": err.get("type"),
+            "field": ".".join([str(x) for x in err.get("loc", [])])
+        })
+    return JSONResponse(
+        status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "message": "Validation error",
+            "data": None,
+            "errors": errors,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled error: {exc}")
+    return JSONResponse(
+        status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "message": "Internal server error",
+            "data": None,
+            "errors": [str(exc)],
+        },
+    )
