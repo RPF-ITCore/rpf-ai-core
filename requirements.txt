@@ -5,6 +5,8 @@ python-dotenv==1.0.1
 pydantic-settings==2.2.1
 aiofiles==23.2.1
 langchain
+langchain-community
+langchain-text-splitters
 PyMuPDF==1.24.3
 Motor==3.1.1
 pymongo==4.3.3

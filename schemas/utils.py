@@ -16,7 +16,7 @@ class ErrorItem(BaseModel):
     field: Optional[str] = None
 
 
-class ApiResponse(Generic[T], BaseModel):
+class ApiResponse(BaseModel, Generic[T]):
     message: str
     data: Optional[T] = None
     errors: List[ErrorItem] = []
