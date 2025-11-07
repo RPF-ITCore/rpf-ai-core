@@ -3,5 +3,6 @@ from routes.data import data_router
 from routes.chat import chat_router
 from routes.chat_session import chat_session_router
 from routes.auth import auth_router
+from routes.stats import stats_router
 
-__all__ = ["base_router", "data_router", "chat_router", "chat_session_router", "auth_router"]
+__all__ = ["base_router", "data_router", "chat_router", "chat_session_router", "auth_router", "stats_router"]

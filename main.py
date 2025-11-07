@@ -11,7 +11,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from vectordb import VectorDBProviderFactory
 from llm import LLMProviderFactory
 from llm.prompt_templates import TemplateParser
-from routes import base_router, data_router, chat_router, chat_session_router, auth_router
+from routes import base_router, data_router, chat_router, chat_session_router, auth_router, stats_router
 app = FastAPI()
 
 # =================Logger Configurations=================
@@ -111,6 +111,7 @@ app.include_router(auth_router)
 app.include_router(data_router)
 app.include_router(chat_router)
 app.include_router(chat_session_router)
+app.include_router(stats_router)
 
 
 @app.exception_handler(HTTPException)

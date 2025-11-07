@@ -1,0 +1,623 @@
+{
+    "cities": [
+      {
+        "name": "Jobar",
+        "scores": [
+          {
+                "aspect": "Public Health",
+                "final_score": 0,
+                "sub_scores": [
+                  { "name": "Health Care System", "score": 0 },
+                  { "name": "Physical Health & Disability", "score": 0 },
+                  { "name": "Disease Control", "score": 0 },
+                  { "name": "Nutrition", "score": 0 },
+                  { "name": "Psych & Mental Health", "score": 0 }
+                ]
+          },
+
+          {
+            "aspect": "Economic Factor",
+            "final_score": 0,
+            "sub_scores": [
+              { "name": "International Aid", "score": 0 },
+              { "name": "Employment Development", "score": 0 },
+              { "name": "Economic Diversification", "score": 0 },
+              { "name": "Tourism", "score": 0 },
+              { "name": "Financial Insecurity", "score": 0 }
+            ]
+          },
+
+          {
+            "aspect": "Resource Management",
+            "final_score": 25,
+            "sub_scores": [
+              { "name": "Capacity Building", "score": 0 },
+              { "name": "Water Resources", "score": 0 },
+              { "name": "Food Insecurity", "score": 0 },
+              { "name": "Energy Resources", "score": 100 }
+            ]
+          },
+
+          {
+            "aspect": "Urban Planning",
+            "final_score": 10.66,
+            "sub_scores": [
+              { "name": "Public Spaces", "score": 13.33 },
+              { "name": "Amenities", "score": 0 },
+              { "name": "Housing & Building", "score": 0 },
+              { "name": "Population", "score": 71.25 },
+              { "name": "Land Use", "score": 0.7 },
+              { "name": "Infrastructure", "score": 0 },
+              { "name": "Urban Transformation", "score": 0 },
+              { "name": "Network & Mobility", "score": 0 }
+            ]
+          },
+
+          {
+            "aspect": "Data Collection",
+            "final_score": 0,
+            "sub_scores": [
+              { "name": "Official Statistics", "score": 0 },
+              { "name": "Research Tools", "score": 0 },
+              { "name": "Mapping Tools", "score": 0 }
+            ]
+          },
+          {
+            "aspect": "Technology & Infrastructure",
+            "final_score": 0,
+            "sub_scores": [
+              { "name": "Social Networking", "score": 0 },
+              { "name": "Online Platforms", "score": 0 },
+              { "name": "Hi-Technology & AI", "score": 0 }
+            ]
+          },
+          
+          
+          {
+            "aspect": "Ecological Factor",
+            "final_score": 0,
+            "sub_scores": [
+              { "name": "Green Spaces", "score": 0 },
+              { "name": "Waste Management", "score": 0 },
+              { "name": "Climate", "score": 0 },
+              { "name": "Natural Disaster", "score": 0 },
+              { "name": "Agriculture", "score": 0 }
+            ]
+          },
+          {
+            "aspect": "Social Factor",
+            "final_score": 0,
+            "sub_scores": [
+              { "name": "Immigration", "score": 0 },
+              { "name": "Local Community", "score": 0 },
+              { "name": "Education System", "score": 0 },
+              { "name": "Community Engagement", "score": 0 }
+            ]
+          },
+
+          {
+            "aspect": "Culture & Heritage",
+            "final_score": 30.6,
+            "sub_scores": [
+              { "name": "Cultural Hub", "score": 0 },
+              { "name": "Identity", "score": 0 },
+              { "name": "Layers of the City", "score": 0 },
+              { "name": "Tangible Heritage", "score": 30 },
+              { "name": "Intangible Heritage", "score": 31.2 }
+            ]
+          },
+
+          {
+            "aspect": "Building Code & Policy",
+            "final_score": 25.4,
+            "sub_scores": [
+              { "name": "Ownership Rights", "score": 100 },
+              { "name": "Safety Standards", "score": 2 },
+              { "name": "Structural Integrity", "score": 2 },
+              { "name": "Energy & Materials Efficiency", "score": 0 },
+              { "name": "Accessibility & Inclusivity", "score": 33 },
+              { "name": "Health & Sanitation", "score": 1 },
+              { "name": "Adaptability & Resilience", "score": 0 }
+            ]
+          }
+          
+        ]
+      },
+
+      {
+        "name": "Daraya",
+        "scores": [
+          {
+                "aspect": "Public Health",
+                "final_score": 12,
+                "sub_scores": [
+                  { "name": "Health Care System", "score": 18 },
+                  { "name": "Physical Health & Disability", "score": 0 },
+                  { "name": "Disease Control", "score": 0 },
+                  { "name": "Nutrition", "score": 43 },
+                  { "name": "Psych & Mental Health", "score": 0 }
+                ]
+          },
+
+          {
+            "aspect": "Economic Factor",
+            "final_score": 39.57,
+            "sub_scores": [
+              { "name": "International Aid", "score": 40.6 },
+              { "name": "Employment Development", "score": 64 },
+              { "name": "Economic Diversification", "score": 20.25 },
+              { "name": "Tourism", "score": 0 },
+              { "name": "Financial Insecurity", "score": 64 }
+            ]
+          },
+
+          {
+            "aspect": "Resource Management",
+            "final_score": 58,
+            "sub_scores": [
+              { "name": "Capacity Building", "score": 13 },
+              { "name": "Water Resources", "score": 86.6 },
+              { "name": "Food Insecurity", "score": 31 },
+              { "name": "Energy Resources", "score": 100 }
+            ]
+          },
+
+          {
+            "aspect": "Urban Planning",
+            "final_score": 38,
+            "sub_scores": [
+              { "name": "Public Spaces", "score": 0 },
+              { "name": "Amenities", "score": 22.86},
+              { "name": "Housing & Building", "score": 52.37 },
+              { "name": "Population", "score": 50 },
+              { "name": "Land Use", "score": 0},
+              { "name": "Infrastructure", "score": 28.25 },
+              { "name": "Urban Transformation", "score": 52.37 },
+              { "name": "Network & Mobility", "score": 100 }
+            ]
+          },
+
+          {
+            "aspect": "Data Collection",
+            "final_score": 21,
+            "sub_scores": [
+              { "name": "Official Statistics", "score": 62 },
+              { "name": "Research Tools", "score": 0 },
+              { "name": "Mapping Tools", "score": 0 }
+            ]
+          },
+          {
+            "aspect": "Technology & Infrastructure",
+            "final_score": 38,
+            "sub_scores": [
+              { "name": "Social Networking", "score": 0 },
+              { "name": "Online Platforms", "score": 62 },
+              { "name": "Hi-Technology & AI", "score": 53 }
+            ]
+          },
+          
+          
+          {
+            "aspect": "Ecological Factor",
+            "final_score": 1,
+            "sub_scores": [
+              { "name": "Green Spaces", "score": 0 },
+              { "name": "Waste Management", "score": 3.7 },
+              { "name": "Climate", "score": 0 },
+              { "name": "Natural Disaster", "score": 0 },
+              { "name": "Agriculture", "score": 0 }
+            ]
+          },
+          {
+            "aspect": "Social Factor",
+            "final_score": 51.5,
+            "sub_scores": [
+              { "name": "Immigration", "score": 33 },
+              { "name": "Local Community", "score": 45 },
+              { "name": "Education System", "score": 65 },
+              { "name": "Community Engagement", "score": 63 }
+            ]
+          },
+
+          {
+            "aspect": "Culture & Heritage",
+            "final_score": 22,
+            "sub_scores": [
+              { "name": "Cultural Hub", "score": 63 },
+              { "name": "Identity", "score": 45 },
+              { "name": "Layers of the City", "score": 0 },
+              { "name": "Tangible Heritage", "score": 0 },
+              { "name": "Intangible Heritage", "score": 0 }
+            ]
+          },
+
+          {
+            "aspect": "Building Code & Policy",
+            "final_score": 46.85,
+            "sub_scores": [
+              { "name": "Ownership Rights", "score": 0 },
+              { "name": "Safety Standards", "score": 52.37 },
+              { "name": "Structural Integrity", "score": 52.37 },
+              { "name": "Energy & Materials Efficiency", "score": 100 },
+              { "name": "Accessibility & Inclusivity", "score": 4.44 },
+              { "name": "Health & Sanitation", "score": 41.2 },
+              { "name": "Adaptability & Resilience", "score": 30.7 }
+            ]
+          }
+          
+        ]
+      },
+      {
+        "name": "Afif",
+        "scores": [
+          {
+                "aspect": "Public Health",
+                "final_score": 58.12,
+                "sub_scores": [
+                  { "name": "Health Care System", "score": 0 },
+                  { "name": "Physical Health & Disability", "score": 59 },
+                  { "name": "Disease Control", "score": 59 },
+                  { "name": "Nutrition", "score": 77 },
+                  { "name": "Psych & Mental Health", "score": 96 }
+                ]
+          },
+
+          {
+            "aspect": "Economic Factor",
+            "final_score": 52.42,
+            "sub_scores": [
+              { "name": "International Aid", "score": 60.5 },
+              { "name": "Employment Development", "score": 95 },
+              { "name": "Economic Diversification", "score": 64 },
+              { "name": "Tourism", "score": 0 },
+              { "name": "Financial Insecurity", "score": 95 }
+            ]
+          },
+
+          {
+            "aspect": "Resource Management",
+            "final_score": 70,
+            "sub_scores": [
+              { "name": "Capacity Building", "score": 0 },
+              { "name": "Water Resources", "score": 90 },
+              { "name": "Food Insecurity", "score": 90 },
+              { "name": "Energy Resources", "score": 100 }
+            ]
+          },
+
+          {
+            "aspect": "Urban Planning",
+            "final_score": 43.38,
+            "sub_scores": [
+              { "name": "Public Spaces", "score": 20 },
+              { "name": "Amenities", "score": 20 },
+              { "name": "Housing & Building", "score": 66 },
+              { "name": "Population", "score": 0 },
+              { "name": "Land Use", "score": 0 },
+              { "name": "Infrastructure", "score": 75 },
+              { "name": "Urban Transformation", "score": 66 },
+              { "name": "Network & Mobility", "score": 100 }
+            ]
+          },
+
+          {
+            "aspect": "Data Collection",
+            "final_score": 26.67,
+            "sub_scores": [
+              { "name": "Official Statistics", "score": 80 },
+              { "name": "Research Tools", "score": 0 },
+              { "name": "Mapping Tools", "score": 0 }
+            ]
+          },
+          {
+            "aspect": "Technology & Infrastructure",
+            "final_score": 38.92,
+            "sub_scores": [
+              { "name": "Social Networking", "score": 0 },
+              { "name": "Online Platforms", "score": 80 },
+              { "name": "Hi-Technology & AI", "score": 66.60 }
+            ]
+          },
+          
+          
+          {
+            "aspect": "Ecological Factor",
+            "final_score": 9.6,
+            "sub_scores": [
+              { "name": "Green Spaces", "score": 20 },
+              { "name": "Waste Management", "score": 28 },
+              { "name": "Climate", "score": 0 },
+              { "name": "Natural Disaster", "score": 0 },
+              { "name": "Agriculture", "score": 0 }
+            ]
+          },
+          {
+            "aspect": "Social Factor",
+            "final_score": 100,
+            "sub_scores": [
+              { "name": "Immigration", "score": 100 },
+              { "name": "Local Community", "score": 0 },
+              { "name": "Education System", "score": 0 },
+              { "name": "Community Engagement", "score": 81 }
+            ]
+          },
+
+          {
+            "aspect": "Culture & Heritage",
+            "final_score": 58.25,
+            "sub_scores": [
+              { "name": "Cultural Hub", "score": 81 },
+              { "name": "Identity", "score": 0 },
+              { "name": "Layers of the City", "score": 76 },
+              { "name": "Tangible Heritage", "score": 76 },
+              { "name": "Intangible Heritage", "score": 0 }
+            ]
+          },
+
+          {
+            "aspect": "Building Code & Policy",
+            "final_score": 63.5,
+            "sub_scores": [
+              { "name": "Ownership Rights", "score": 0 },
+              { "name": "Safety Standards", "score": 66 },
+              { "name": "Structural Integrity", "score": 66 },
+              { "name": "Energy & Materials Efficiency", "score": 100 },
+              { "name": "Accessibility & Inclusivity", "score": 17.5 },
+              { "name": "Health & Sanitation", "score": 95 },
+              { "name": "Adaptability & Resilience", "score": 100 }
+            ]
+          }
+          
+        ]
+      },
+
+      {
+        "name": "Jaramana",
+        "scores": [
+          {
+                "aspect": "Public Health",
+                "final_score": 57.2,
+                "sub_scores": [
+                  { "name": "Health Care System", "score": 9 },
+                  { "name": "Physical Health & Disability", "score": 64 },
+                  { "name": "Disease Control", "score": 64 },
+                  { "name": "Nutrition", "score": 63 },
+                  { "name": "Psych & Mental Health", "score": 86 }
+                ]
+          },
+
+          {
+            "aspect": "Economic Factor",
+            "final_score": 38.57,
+            "sub_scores": [
+              { "name": "International Aid", "score": 73 },
+              { "name": "Employment Development", "score": 31 },
+              { "name": "Economic Diversification", "score": 96 },
+              { "name": "Tourism", "score": 0 },
+              { "name": "Financial Insecurity", "score": 31 }
+            ]
+          },
+
+          {
+            "aspect": "Resource Management",
+            "final_score": 58,
+            "sub_scores": [
+              { "name": "Capacity Building", "score": 9 },
+              { "name": "Water Resources", "score": 60},
+              { "name": "Food Insecurity", "score": 63 },
+              { "name": "Energy Resources", "score": 100 }
+            ]
+          },
+
+          {
+            "aspect": "Urban Planning",
+            "final_score": 52,
+            "sub_scores": [
+              { "name": "Public Spaces", "score": 20 },
+              { "name": "Amenities", "score": 76 },
+              { "name": "Housing & Building", "score": 38 },
+              { "name": "Population", "score": 78 },
+              { "name": "Land Use", "score": 0 },
+              { "name": "Infrastructure", "score": 76 },
+              { "name": "Urban Transformation", "score": 38 },
+              { "name": "Network & Mobility", "score": 90 }
+            ]
+          },
+
+          {
+            "aspect": "Data Collection",
+            "final_score": 17,
+            "sub_scores": [
+              { "name": "Official Statistics", "score": 51 },
+              { "name": "Research Tools", "score": 0 },
+              { "name": "Mapping Tools", "score": 0 }
+            ]
+          },
+          {
+            "aspect": "Technology & Infrastructure",
+            "final_score": 33,
+            "sub_scores": [
+              { "name": "Social Networking", "score": 0 },
+              { "name": "Online Platforms", "score": 0 },
+              { "name": "Hi-Technology & AI", "score": 100 }
+            ]
+          },
+          
+          
+          {
+            "aspect": "Ecological Factor",
+            "final_score": 33.3,
+            "sub_scores": [
+              { "name": "Green Spaces", "score": 20 },
+              { "name": "Waste Management", "score": 1 },
+              { "name": "Climate", "score": 0 },
+              { "name": "Natural Disaster", "score": 0 },
+              { "name": "Agriculture", "score": 10 }
+            ]
+          },
+          {
+            "aspect": "Social Factor",
+            "final_score": 83.5,
+            "sub_scores": [
+              { "name": "Immigration", "score": 80 },
+              { "name": "Local Community", "score": 90 },
+              { "name": "Education System", "score": 100 },
+              { "name": "Community Engagement", "score": 64 }
+            ]
+          },
+
+          {
+            "aspect": "Culture & Heritage",
+            "final_score": 44,
+            "sub_scores": [
+              { "name": "Cultural Hub", "score": 66 },
+              { "name": "Identity", "score": 90 },
+              { "name": "Layers of the City", "score": 0 },
+              { "name": "Tangible Heritage", "score": 0 },
+              { "name": "Intangible Heritage", "score": 62 }
+            ]
+          },
+
+          {
+            "aspect": "Building Code & Policy",
+            "final_score": 81,
+            "sub_scores": [
+              { "name": "Ownership Rights", "score": 62 },
+              { "name": "Safety Standards", "score": 81 },
+              { "name": "Structural Integrity", "score": 81 },
+              { "name": "Energy & Materials Efficiency", "score": 100 },
+              { "name": "Accessibility & Inclusivity", "score": 76 },
+              { "name": "Health & Sanitation", "score": 94 },
+              { "name": "Adaptability & Resilience", "score": 73 }
+            ]
+          }
+          
+        ]
+      },
+
+      {
+        "name": "Old Damascus",
+        "scores": [
+          {
+                "aspect": "Public Health",
+                "final_score": 30,
+                "sub_scores": [
+                  { "name": "Health Care System", "score": 40 },
+                  { "name": "Physical Health & Disability", "score": 18.4 },
+                  { "name": "Disease Control", "score": 42 },
+                  { "name": "Nutrition", "score": 32.5 },
+                  { "name": "Psych & Mental Health", "score": 18 }
+                ]
+          },
+
+          {
+            "aspect": "Economic Factor",
+            "final_score": 28,
+            "sub_scores": [
+              { "name": "International Aid", "score": 0 },
+              { "name": "Employment Development", "score": 66 },
+              { "name": "Economic Diversification", "score": 12 },
+              { "name": "Tourism", "score": 25 },
+              { "name": "Financial Insecurity", "score": 66 }
+            ]
+          },
+
+          {
+            "aspect": "Resource Management",
+            "final_score": 74,
+            "sub_scores": [
+              { "name": "Capacity Building", "score": 40 },
+              { "name": "Water Resources", "score": 75},
+              { "name": "Food Insecurity", "score": 81 },
+              { "name": "Energy Resources", "score": 100 }
+            ]
+          },
+
+          {
+            "aspect": "Urban Planning",
+            "final_score": 63,
+            "sub_scores": [
+              { "name": "Public Spaces", "score": 41 },
+              { "name": "Amenities", "score": 88 },
+              { "name": "Housing & Building", "score": 56.25 },
+              { "name": "Population", "score": 50 },
+              { "name": "Land Use", "score": 38 },
+              { "name": "Infrastructure", "score": 75 },
+              { "name": "Urban Transformation", "score": 56.25 },
+              { "name": "Network & Mobility", "score": 100 }
+            ]
+          },
+
+          {
+            "aspect": "Data Collection",
+            "final_score": 21,
+            "sub_scores": [
+              { "name": "Official Statistics", "score": 64 },
+              { "name": "Research Tools", "score": 0 },
+              { "name": "Mapping Tools", "score": 0 }
+            ]
+          },
+          {
+            "aspect": "Technology & Infrastructure",
+            "final_score": 55,
+            "sub_scores": [
+              { "name": "Social Networking", "score": 0 },
+              { "name": "Online Platforms", "score": 64 },
+              { "name": "Hi-Technology & AI", "score": 100 }
+            ]
+          },
+          
+          
+          {
+            "aspect": "Ecological Factor",
+            "final_score": 33,
+            "sub_scores": [
+              { "name": "Green Spaces", "score": 9.5 },
+              { "name": "Waste Management", "score": 56 },
+              { "name": "Climate", "score": 0 },
+              { "name": "Natural Disaster", "score": 0 },
+              { "name": "Agriculture", "score": 10 }
+            ]
+          },
+          {
+            "aspect": "Social Factor",
+            "final_score": 32.26,
+            "sub_scores": [
+              { "name": "Immigration", "score": 12 },
+              { "name": "Local Community", "score": 43.75 },
+              { "name": "Education System", "score": 57 },
+              { "name": "Community Engagement", "score": 16.3 }
+            ]
+          },
+
+          {
+            "aspect": "Culture & Heritage",
+            "final_score": 12.8,
+            "sub_scores": [
+              { "name": "Cultural Hub", "score": 30 },
+              { "name": "Identity", "score": 0 },
+              { "name": "Layers of the City", "score": 0 },
+              { "name": "Tangible Heritage", "score": 12 },
+              { "name": "Intangible Heritage", "score": 22 }
+            ]
+          },
+
+          {
+            "aspect": "Building Code & Policy",
+            "final_score": 78.6,
+            "sub_scores": [
+              { "name": "Ownership Rights", "score": 0 },
+              { "name": "Safety Standards", "score": 87 },
+              { "name": "Structural Integrity", "score": 87 },
+              { "name": "Energy & Materials Efficiency", "score": 53 },
+              { "name": "Accessibility & Inclusivity", "score": 74 },
+              { "name": "Health & Sanitation", "score": 92 },
+              { "name": "Adaptability & Resilience", "score": 0 }
+            ]
+          }
+          
+        ]
+      }
+    ]
+  }
+  
