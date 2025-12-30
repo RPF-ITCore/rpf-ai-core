@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     DEFAULT_LANGUAGE : str = 'en'
     PRIMARY_LANGUAGE : str
 
+    RPF_KB_COLLECTION_NAME : str = "rpf_kb"
+
     JWT_SECRET_KEY : str
     JWT_ALGORITHM : str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES : int = 30

@@ -71,6 +71,37 @@ def load_available_cities():
         )
 
 
+def load_cities_coordinates():
+    """
+    Load cities coordinates data from stats/cities_coordinates.json file
+    Returns the parsed JSON data
+    """
+    try:
+        # Get the base directory (project root)
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        coordinates_file_path = os.path.join(base_dir, "stats", "cities_coordinates.json")
+        
+        if not os.path.exists(coordinates_file_path):
+            raise FileNotFoundError(f"Cities coordinates file not found at: {coordinates_file_path}")
+        
+        with open(coordinates_file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return data
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing JSON file: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error parsing cities coordinates file: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Error loading cities coordinates: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error loading cities coordinates: {str(e)}"
+        )
+
+
 @stats_router.get("", summary="Get city statistics", status_code=status.HTTP_200_OK)
 async def get_city_stats(
     city: str = Query(None, description="Filter by city name (case-insensitive)")
@@ -152,5 +183,64 @@ async def get_available_cities():
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred while retrieving available cities: {str(e)}"
+        )
+
+
+@stats_router.get("/location", summary="Get city coordinates", status_code=status.HTTP_200_OK)
+async def get_city_location(
+    city: str = Query(..., description="City name (case-insensitive)")
+):
+    """
+    Get the geographic coordinates (latitude and longitude) for a specific city.
+    
+    - **city** (required): City name to get coordinates for.
+      Case-insensitive matching is performed.
+    
+    Returns the latitude and longitude coordinates for the specified city.
+    """
+    try:
+        # Load the cities coordinates data
+        coordinates_data = load_cities_coordinates()
+        cities = coordinates_data.get("cities", [])
+        
+        if not city:
+            return base.fail(
+                message="City parameter is required",
+                errors=["City name must be provided"],
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Search for the city (case-insensitive)
+        city_lower = city.lower().strip()
+        matching_city = None
+        
+        for c in cities:
+            if c.get("name", "").lower() == city_lower:
+                matching_city = c
+                break
+        
+        if not matching_city:
+            return base.fail(
+                message=f"City '{city}' not found",
+                errors=[f"No coordinates found for city: {city}"],
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        
+        return base.ok(
+            data={
+                "city": matching_city["name"],
+                "lat": matching_city["lat"],
+                "lon": matching_city["lon"]
+            },
+            message=f"Coordinates retrieved successfully for {matching_city['name']}"
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in get_city_location endpoint: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred while retrieving city location: {str(e)}"
         )
 

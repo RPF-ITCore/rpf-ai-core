@@ -18,11 +18,19 @@ base = BaseController()
 logger = logging.getLogger(__name__)
 
 def get_chat_controller(request: Request) -> ChatController:
-    """Dependency to get chat controller"""
+    """Dependency to get chat controller with RAG support"""
     if not hasattr(request.app, 'db_client'):
         raise HTTPException(status_code=500, detail="Database not initialized")
     
-    controller = ChatController(request.app.db_client)
+    # Vector DB and embedding client are optional - RAG will gracefully fall back if unavailable
+    vectordb_client = getattr(request.app, 'vectordb_client', None)
+    embedding_client = getattr(request.app, 'embedding_client', None)
+    
+    controller = ChatController(
+        db=request.app.db_client,
+        vectordb_client=vectordb_client,
+        embedding_client=embedding_client
+    )
     return controller
 
 @chat_session_router.on_event("startup")

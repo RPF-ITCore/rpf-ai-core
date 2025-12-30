@@ -73,10 +73,19 @@ async def startup():
         
         # Embedding Client
         app.embedding_client = llm_provider_factory.create(provider=settings.EMBEDDING_BACKEND)
+        # Get embedding size from settings - this must match the actual model output dimensions
+        # Parse as int, with fallback to 1536 if not provided
+        try:
+            embedding_size = int(settings.EMBEDDING_MODEL_SIZE) if settings.EMBEDDING_MODEL_SIZE else 1536
+        except (ValueError, TypeError):
+            embedding_size = 1536
+            logger.warning(f"Could not parse EMBEDDING_MODEL_SIZE from settings, using default: {embedding_size}")
+        
         app.embedding_client.set_embedding_model(
             model_id=settings.EMBEDDING_MODEL_ID,
-            embedding_size=1536  # For OpenAI's text-embedding-ada-002 model
+            embedding_size=embedding_size
         )
+        logger.info(f"Embedding model '{settings.EMBEDDING_MODEL_ID}' configured with size: {embedding_size} dimensions")
 
         logger.info(f"LLM Generation Model has beed initialized : {settings.GENERATION_MODEL_ID}")
         logger.info(f"LLM Embedding Model has beed initialized : {settings.EMBEDDING_MODEL_ID}")

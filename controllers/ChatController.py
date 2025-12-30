@@ -5,21 +5,46 @@ from typing import Optional, List
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from services.chat import ChatService
-from llm.llm_config import get_generation_client
+from llm.llm_config import get_generation_client, get_embedding_client
 from schemas.chat import MessageRole, MessageType
 from dtos.chat import (
     CreateSessionRequest, CreateMessageRequest, ChatRequest,
     SessionResponse, MessageResponse, ChatResponse, SessionWithMessagesResponse,
     UpdateSessionRequest
 )
+from controllers.AIController import AIController
+from core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
 class ChatController:
-    def __init__(self, db: AsyncIOMotorDatabase):
+    def __init__(
+        self,
+        db: AsyncIOMotorDatabase,
+        vectordb_client=None,
+        embedding_client=None
+    ):
         self.db = db
         self.chat_service = ChatService(db)
         self.generation_client = get_generation_client()
+        self.vectordb_client = vectordb_client
+        self.embedding_client = embedding_client or get_embedding_client()
+        self.settings = get_settings()
+        
+        # Initialize AI Controller for RAG if vector DB is available
+        self.ai_controller = None
+        if self.vectordb_client:
+            try:
+                self.ai_controller = AIController(
+                    vectordb_client=self.vectordb_client,
+                    embedding_client=self.embedding_client,
+                    generation_client=self.generation_client,
+                    settings=self.settings
+                )
+                logger.info("AIController initialized for RAG support")
+            except Exception as e:
+                logger.warning(f"Failed to initialize AIController: {str(e)}")
+                self.ai_controller = None
         
     async def initialize(self):
         """Initialize the controller and create necessary indexes"""
@@ -157,11 +182,80 @@ class ChatController:
     
     async def _generate_ai_response(self, session_id: str) -> str:
         """
-        Generate AI response based on chat history
+        Generate AI response based on chat history with RAG enhancement.
+        Falls back to non-RAG response if RAG is unavailable.
         """
         try:
             # Get recent messages for context (last 5 messages)
             recent_messages = await self.chat_service.get_recent_messages(session_id, count=5)
+            
+            if not recent_messages:
+                logger.warning("No recent messages found")
+                return "I apologize, but I'm having trouble generating a response right now. Please try again."
+            
+            # Extract the most recent user message (current query)
+            # Messages are in chronological order, so the last one is most recent
+            current_user_message = None
+            conversation_history = []
+            
+            # Process messages in reverse to find the current query (most recent user message)
+            found_current_query = False
+            for msg in reversed(recent_messages):
+                if not found_current_query and msg.role == MessageRole.USER:
+                    # This is the current query
+                    current_user_message = msg.content
+                    found_current_query = True
+                else:
+                    # These are part of conversation history
+                    if msg.role == MessageRole.USER:
+                        conversation_history.insert(0, {
+                            "role": "user",
+                            "content": msg.content
+                        })
+                    elif msg.role == MessageRole.ASSISTANT:
+                        conversation_history.insert(0, {
+                            "role": "assistant",
+                            "content": msg.content
+                        })
+            
+            if not current_user_message:
+                # Fallback: use the last message as query if it's not a user message
+                logger.warning("No user message found, using last message as query")
+                current_user_message = recent_messages[-1].content if recent_messages else ""
+            
+            # Try to use RAG if available
+            if self.ai_controller:
+                try:
+                    # Get collection name from settings
+                    collection_name = self.settings.RPF_KB_COLLECTION_NAME
+                    
+                    # Check if RAG should be used
+                    if self.ai_controller.should_use_rag(collection_name):
+                        logger.info(f"Using RAG with collection '{collection_name}'")
+                        
+                        # Generate RAG-enhanced response
+                        response, retrieved_docs = await self.ai_controller.generate_rag_response(
+                            query=current_user_message,
+                            collection_name=collection_name,
+                            conversation_history=conversation_history,
+                            max_results=5,
+                            max_tokens=1000,
+                            temperature=0.7
+                        )
+                        
+                        if retrieved_docs:
+                            logger.info(f"RAG response generated with {len(retrieved_docs)} retrieved documents")
+                        else:
+                            logger.info("RAG response generated but no documents retrieved")
+                        
+                        return response
+                    else:
+                        logger.info(f"RAG collection '{collection_name}' not available, falling back to non-RAG")
+                except Exception as e:
+                    logger.warning(f"RAG generation failed, falling back to non-RAG: {str(e)}")
+            
+            # Fallback to non-RAG response
+            logger.info("Using non-RAG response generation")
             
             # Convert to LLM format
             llm_messages = []
@@ -184,7 +278,7 @@ class ChatController:
                     })
                 elif msg.role == MessageRole.ASSISTANT:
                     llm_messages.append({
-                        "role": "assistant", 
+                        "role": "assistant",
                         "content": msg.content
                     })
             
