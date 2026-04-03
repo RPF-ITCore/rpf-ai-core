@@ -1,0 +1,14 @@
+# FastAPI API only. MongoDB and Qdrant are expected at the URLs in your .env (e.g. Atlas + Qdrant Cloud).
+services:
+  api:
+    build: .
+    ports:
+      - "${HOST_PORT:-5000}:8000"
+    env_file:
+      - .env
+    environment:
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      # Persist uploads and local vector DB paths under assets/
+      - ./assets:/app/assets
+    restart: unless-stopped
