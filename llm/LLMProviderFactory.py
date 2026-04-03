@@ -7,7 +7,8 @@ class LLMProviderFactory:
 
     
     def create(self, provider : str):
-        if provider == LLMEnums.OPENAI.value:
+        normalized = (provider or "").strip().upper()
+        if normalized == LLMEnums.OPENAI.value:
             return OpenAIProvider(
                 api_key =  self.config.OPENAI_API_KEY,
                 api_url =  self.config.OPENAI_API_URL,
@@ -16,7 +17,7 @@ class LLMProviderFactory:
                 default_generation_temperature = self.config.DEFAULT_GENERATION_TEMPREATUER 
             )
         
-        if provider == LLMEnums.COHERE.value:
+        if normalized == LLMEnums.COHERE.value:
             return CoHereProvider(
                 api_key =  self.config.COHERE_API_KEY,
                 default_generation_max_output_tokens = self.config.DEFAULT_GENERATION_MAX_OUTPUT_TOKENS,
@@ -24,7 +25,10 @@ class LLMProviderFactory:
                 default_generation_tempreature = self.config.DEFAULT_GENERATION_TEMPREATUER 
             )
 
-        
-        return None
+        valid = f"{LLMEnums.OPENAI.value}, {LLMEnums.COHERE.value}"
+        raise ValueError(
+            f"Unknown LLM provider {provider!r} (normalized: {normalized!r}). "
+            f"Set GENERATION_BACKEND or EMBEDDING_BACKEND to one of: {valid}."
+        )
 
 

@@ -11,6 +11,7 @@ WORKDIR /app
 # Minimal OS deps for SSL, wheels, and common native extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
@@ -26,6 +27,6 @@ EXPOSE 8000
 ENV WEB_CONCURRENCY=2
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/healthcheck')"
+    CMD curl -fsS http://127.0.0.1:8000/api/v1/healthcheck >/dev/null || exit 1
 
 CMD ["sh", "-c", "gunicorn main:app -w ${WEB_CONCURRENCY} -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000"]

@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings , SettingsConfigDict
 
 
@@ -11,6 +12,13 @@ class Settings(BaseSettings):
     
     GENERATION_BACKEND : str
     EMBEDDING_BACKEND : str
+
+    @field_validator("GENERATION_BACKEND", "EMBEDDING_BACKEND", mode="before")
+    @classmethod
+    def strip_upper_backend(cls, v):
+        if v is None:
+            return v
+        return str(v).strip().upper()
 
     OPENAI_API_KEY : str 
     OPENAI_API_URL : str
